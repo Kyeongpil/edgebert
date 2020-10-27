@@ -146,7 +146,7 @@ script
     --gradient_accumulation_steps 1 \
     --update_freezed_bert_parameter_steps 3
     
-to close accekaration mechanism 
+to close acceleration mechanism 
 
     --eval_all_checkpoints \
     --evaluate_every_epoch \
