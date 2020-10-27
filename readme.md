@@ -118,6 +118,7 @@ edge-level model
     - around 20h\epoch to 4h\epoch
     - lower gpu cost, especially for input examples with more neighbor-edges in Graph
 
+script 
 
     python run_edge_bert.py \
     --model_type edgebert \
@@ -190,7 +191,7 @@ update BertEncoder structure, for original bert embedding layer
 - segment_embeddings
 Add token net embeddings into embedding layer
 
-
+script 
 
     python run_edge_bert.py \
     --model_type tokennetedgebert \
@@ -228,6 +229,7 @@ previous models are edge-level models, we also accomplish some node-level gnn mo
 - GAT
 - GraphSAGE
 
+script 
 
     python run_node_model.py \
     --model_type gat \
