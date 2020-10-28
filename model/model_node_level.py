@@ -193,6 +193,9 @@ class GraphsageEncoder(nn.Module):
             if self.config.gnn_aggregator == "meanpool":
                 setattr(self, "sage_pool_{}".format(layer_index), nn.Linear(gnn_input_dim, gnn_output_dim))
                 neighbor_dim = gnn_output_dim
+            elif self.config.gnn_aggregator == "lstm":
+                setattr(self, "sage_pool_{}".format(layer_index), nn.LSTM(gnn_input_dim, gnn_output_dim, 2))
+                neighbor_dim = gnn_output_dim
             else:
                 neighbor_dim = gnn_input_dim
             # combiner
@@ -219,13 +222,16 @@ class GraphsageEncoder(nn.Module):
         for layer_index in range(self.num_layers):
             hidden = []
             for hop in range(self.num_layers - layer_index):
-                neigh_emb = torch.reshape(node_emb[hop+1], [-1, fanouts[hop], node_emb[hop+1].shape[-1]])
+                neigh_emb = torch.reshape(node_emb[hop+1], [-1, fanouts[hop], node_emb[hop+1].shape[-1]]) # [bs, neigh_cnt, feat_dim]
                 if self.config.gnn_aggregator == "meanpool":
                     neigh_emb = getattr(self, "sage_pool_{}".format(layer_index))(neigh_emb)
                     neigh_emb = torch.mean(neigh_emb, dim=1)
                 elif self.config.gnn_aggregator == "mean":
                     neigh_emb = torch.mean(neigh_emb, dim=1)
-
+                elif self.config.gnn_aggregator == "lstm":
+                    out = getattr(self, "sage_pool_{}".format(layer_index))(neigh_emb)
+                    neigh_emb = out[0]
+                    neigh_emb = torch.mean(neigh_emb, dim=1)
                 if self.config.gnn_residual == "add":
                     node = getattr(self, "sage_add_{}".format(layer_index))(node_emb[hop])
                     if neigh_emb.shape[-1] != node.shape[-1]:
@@ -373,15 +379,23 @@ class GatEncoder(nn.Module):
 
 
 
-def test_demo():
+def gnn_demo():
     config = BertNodeGnnConfig(
-        gnn_encoder='gat',
+        gnn_encoder='graphsage',
         num_labels=2,
         gnn_fanouts=[3],
-        gnn_aggregator='concat',
+        gnn_aggregator='lstm',
         is_freeze_bert=False,
         inference_neighbor_bert=True,
     )
+    # config = BertNodeGnnConfig(
+    #     gnn_encoder='gat',
+    #     num_labels=2,
+    #     gnn_fanouts=[3],
+    #     gnn_aggregator='concat',
+    #     is_freeze_bert=False,
+    #     inference_neighbor_bert=True,
+    # )
     model = BertNodeGnnModel(config)
 
     txt = "I am Happy today"
@@ -408,5 +422,5 @@ def test_demo():
     )[0]
     print(loss)
 if __name__ == '__main__':
-    test_demo()
+    gnn_demo()
 
