@@ -155,8 +155,7 @@ to close acceleration mechanism
     --load_pretrained_bert_checkpoint \
     --gradient_accumulation_steps 1
     
-change the gnn part to GraphBert
-        update --model_type from edgebert to graphbert
+to change the gnn part to [GraphBert](https://arxiv.org/pdf/2001.05140.pdf)-style gnn decoder model, update --model_type from edgebert to graphbert
 
 
 #### TokenNet
